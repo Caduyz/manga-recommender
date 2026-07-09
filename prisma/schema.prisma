@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id         String @id
+    name       String
+    email      String @unique
+    createdAt  DateTime @default(now())
+    active     Boolean @default(true)
+
+    library MangaEntry[]
+}
+
+model Manga {
+    id            String @id
+    title         String
+    originalTitle String?
+
+    synopsis        String?
+    publicationYear Int?
+    averageScore    Float?
+    coverFileName   String?
+
+    dexCreatedAt DateTime
+    dexUpdatedAt DateTime
+    importedAt   DateTime
+
+    authors Creator[] @relation("MangaAuthors")
+    artists Creator[] @relation("MangaArtists")
+
+    tags          Tag[]
+    demography    Demography?
+    contentRating ContentRating?
+
+    libraryEntries MangaEntry[]
+
+    @@index([title])
+}
+
+model MangaEntry {
+    userId  String
+    mangaId String
+
+    status    ReadingStatus
+    userScore Int?
+
+    chapterProgress Int @default(0)
+    startedAt       DateTime?
+    finishedAt      DateTime?
+    importedAt      DateTime @updatedAt
+    
+    user  User @relation(fields: [userId], references: [id])
+    manga Manga @relation(fields: [mangaId], references: [id])
+
+    @@id([userId, mangaId])
+}
+
+model Creator {
+    id   String @id
+    name String
+
+    authoredMangas    Manga[] @relation("MangaAuthors")
+    illustratedMangas Manga[] @relation("MangaArtists")
+
+    @@index([name])
+}
+
+model Tag {
+    id   String @id
+    name String @unique
+    type TagType
+
+    affinitiesFrom TagAffinity[] @relation("TagAffinityA")
+    affinitiesTo   TagAffinity[] @relation("TagAffinityB")
+
+    mangas Manga[]
+}
+
+model TagAffinity {
+    tagAId String
+    tagBId String
+
+    intersection Int
+    union        Int
+    similarity   Float
+
+    updatedAt DateTime @updatedAt
+
+    tagA Tag @relation("TagAffinityA", fields: [tagAId], references: [id])
+    tagB Tag @relation("TagAffinityB", fields: [tagBId], references: [id])
+
+    @@id([tagAId, tagBId])
+    @@index([similarity])
+}
+
+enum Demography {
+    SEINEN
+    SHONEN
+    JOSEI
+    SHOJO
+    KODOMOMUKE
+}
+
+enum ContentRating {
+    SAFE
+    SUGGESTIVE
+    EROTICA
+    PORNOGRAPHIC
+}
+
+enum ReadingStatus {
+    READING
+    COMPLETED
+    DROPPED
+    ON_HOLD
+    PLAN_TO_READ
+}
+
+enum TagType {
+    GENRE
+    THEME
+}
