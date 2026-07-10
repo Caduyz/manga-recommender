@@ -7,5 +7,6 @@ import { MangaController } from './manga.controller';
   imports: [MangaDexModule],
   controllers: [MangaController],
   providers: [MangaService],
+  exports: [MangaService],
 })
 export class MangaModule {}

@@ -9,6 +9,7 @@ export class MangaDexController {
   @Get('manga/:id')
   async getManga(@Param('id') id: string) {
     const raw = await this.mangaDexService.getMangaById(id);
-    return MangaMapper.toInternal(raw.data as MangaDexMangaData);
+
+    return MangaMapper.toInternal(raw);
   }
 }
