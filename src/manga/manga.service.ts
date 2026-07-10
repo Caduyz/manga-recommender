@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MangaDexService } from '../manga-dex/manga-dex.service';
 import {
@@ -16,7 +16,7 @@ export class MangaService {
 
   async importFromMangaDex(id: string) {
     const raw = await this.mangaDexService.getMangaById(id);
-    const mapped = MangaMapper.toInternal(raw.data as MangaDexMangaData);
+    const mapped = MangaMapper.toInternal(raw);
     return this.upsertFromMangaDex(mapped);
   }
 
@@ -44,6 +44,7 @@ export class MangaService {
         originalTitle: mapped.originalTitle,
         synopsis: mapped.synopsis,
         publicationYear: mapped.publicationYear,
+        averageScore: mapped.averageScore,
         lastChapter: mapped.lastChapter,
         coverFileName: mapped.coverFileName,
         demography: mapped.demography,
@@ -60,6 +61,7 @@ export class MangaService {
         originalTitle: mapped.originalTitle,
         synopsis: mapped.synopsis,
         publicationYear: mapped.publicationYear,
+        averageScore: mapped.averageScore,
         lastChapter: mapped.lastChapter,
         coverFileName: mapped.coverFileName,
         demography: mapped.demography,
@@ -70,5 +72,20 @@ export class MangaService {
         artists: { set: [], connectOrCreate: artistConnections },
       },
     });
+  }
+
+  async findRandom() {
+      const count = await this.prisma.manga.count();
+
+      if (count === 0) throw new NotFoundException("Nenhum mangá encontrado.");
+
+      const randomIndex = Math.floor(Math.random() * count);
+
+      return this.prisma.manga.findFirst({
+          skip: randomIndex,
+          orderBy: {
+              id: "asc",
+          },
+      });
   }
 }

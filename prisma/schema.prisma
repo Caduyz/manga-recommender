@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
@@ -14,17 +14,17 @@ datasource db {
 }
 
 model User {
-    id         String @id
-    name       String
-    email      String @unique
-    createdAt  DateTime @default(now())
-    active     Boolean @default(true)
+    id        String   @id
+    name      String
+    email     String   @unique
+    createdAt DateTime @default(now())
+    active    Boolean  @default(true)
 
     library MangaEntry[]
 }
 
 model Manga {
-    id            String @id
+    id            String  @id
     title         String
     originalTitle String?
 
@@ -57,12 +57,12 @@ model MangaEntry {
     status    ReadingStatus
     userScore Int?
 
-    chapterProgress Int @default(0)
+    chapterProgress Int       @default(0)
     startedAt       DateTime?
     finishedAt      DateTime?
-    importedAt      DateTime @updatedAt
-    
-    user  User @relation(fields: [userId], references: [id])
+    importedAt      DateTime  @updatedAt
+
+    user  User  @relation(fields: [userId], references: [id])
     manga Manga @relation(fields: [mangaId], references: [id])
 
     @@id([userId, mangaId])
@@ -79,8 +79,8 @@ model Creator {
 }
 
 model Tag {
-    id   String @id
-    name String @unique
+    id   String  @id
+    name String  @unique
     type TagType
 
     affinitiesFrom TagAffinity[] @relation("TagAffinityA")
@@ -132,4 +132,6 @@ enum ReadingStatus {
 enum TagType {
     GENRE
     THEME
+    FORMAT
+    CONTENT
 }

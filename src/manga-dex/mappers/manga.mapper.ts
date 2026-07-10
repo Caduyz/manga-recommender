@@ -1,5 +1,3 @@
-// src/manga-dex/mappers/manga.mapper.ts
-
 // Objetos multi-idioma da MangaDex sempre têm esse formato:
 // { "en": "texto em inglês", "ja-ro": "texto romanizado", ... }
 interface LocalizedText {
@@ -18,8 +16,8 @@ interface MangaDexRelationship {
   id: string;
   type: string;
   attributes?: {
-    name?: string; // presente em author/artist, graças ao includes[]
-    fileName?: string; // presente em cover_art, graças ao includes[]
+    name?: string;
+    fileName?: string;
   };
 }
 
@@ -38,6 +36,8 @@ interface MangaDexMangaAttributes {
 
 export interface MangaDexMangaData {
   id: string;
+  averageScore: number | null;
+
   attributes: MangaDexMangaAttributes;
   relationships: MangaDexRelationship[];
 }
@@ -48,13 +48,14 @@ export interface MappedManga {
   originalTitle: string | null;
   synopsis: string | null;
   publicationYear: number | null;
+  averageScore: number | null;
   lastChapter: string | null;
   coverFileName: string | null;
   demography: 'SHONEN' | 'SHOJO' | 'JOSEI' | 'SEINEN' | null;
   contentRating: 'SAFE' | 'SUGGESTIVE' | 'EROTICA' | 'PORNOGRAPHIC';
   dexCreatedAt: Date;
   dexUpdatedAt: Date;
-  tags: { id: string; name: string; type: 'GENRE' | 'THEME' }[];
+  tags: { id: string; name: string; type: 'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT' }[];
   authors: { id: string; name: string }[];
   artists: { id: string; name: string }[];
 }
@@ -119,7 +120,7 @@ export class MangaMapper {
         pickText(tag.attributes.name, 'en') ??
         firstAvailable(tag.attributes.name) ??
         '',
-      type: tag.attributes.group.toUpperCase() as 'GENRE' | 'THEME',
+      type: tag.attributes.group.toUpperCase() as 'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT',
     }));
 
     return {
@@ -128,11 +129,11 @@ export class MangaMapper {
       originalTitle,
       synopsis,
       publicationYear: attributes.year,
+      averageScore: data.averageScore,
       lastChapter: attributes.lastChapter,
       coverFileName: cover?.attributes?.fileName ?? null,
       demography,
-      contentRating:
-        attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
+      contentRating: attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
       dexCreatedAt: new Date(attributes.createdAt),
       dexUpdatedAt: new Date(attributes.updatedAt),
       tags,
