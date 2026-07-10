@@ -6,12 +6,16 @@ import { MangaDexModule } from './manga-dex/manga-dex.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { MangaModule } from './manga/manga.module';
+import { RecommendationModule } from './recommendation/recommendation.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    HealthModule, 
-    MangaDexModule, PrismaModule, MangaModule
+    HealthModule,
+    MangaDexModule,
+    PrismaModule,
+    MangaModule,
+    RecommendationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -23,12 +23,17 @@ export class MangaDexService {
       const axiosError = error as AxiosError;
 
       if (axiosError.response?.status === 429) {
-        this.logger.warn('Rate limit atingido, aguardando 1s antes de tentar de novo...');
+        this.logger.warn(
+          'Rate limit atingido, aguardando 1s antes de tentar de novo...',
+        );
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return this.getMangaById(id);
       }
 
-      this.logger.error(`Erro ao buscar mangá ${id} na MangaDex`, axiosError.message);
+      this.logger.error(
+        `Erro ao buscar mangá ${id} na MangaDex`,
+        axiosError.message,
+      );
       throw error;
     }
   }

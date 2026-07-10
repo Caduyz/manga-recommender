@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { MangaDexService } from '../manga-dex/manga-dex.service';
-import { MangaMapper, MangaDexMangaData, MappedManga } from '../manga-dex/mappers/manga.mapper';
+import {
+  MangaMapper,
+  MangaDexMangaData,
+  MappedManga,
+} from '../manga-dex/mappers/manga.mapper';
 
 @Injectable()
 export class MangaService {

@@ -18,8 +18,8 @@ interface MangaDexRelationship {
   id: string;
   type: string;
   attributes?: {
-    name?: string;      // presente em author/artist, graças ao includes[]
-    fileName?: string;  // presente em cover_art, graças ao includes[]
+    name?: string; // presente em author/artist, graças ao includes[]
+    fileName?: string; // presente em cover_art, graças ao includes[]
   };
 }
 
@@ -63,7 +63,10 @@ function pickText(text: LocalizedText, lang: string): string | undefined {
   return text[lang];
 }
 
-function pickFromAltTitles(altTitles: LocalizedText[], lang: string): string | undefined {
+function pickFromAltTitles(
+  altTitles: LocalizedText[],
+  lang: string,
+): string | undefined {
   const found = altTitles.find((entry) => entry[lang]);
   return found?.[lang];
 }
@@ -97,7 +100,7 @@ export class MangaMapper {
     const synopsis = pickText(attributes.description, 'en') ?? null;
 
     const demography = attributes.publicationDemographic
-      ? DEMOGRAPHY_MAP[attributes.publicationDemographic] ?? null
+      ? (DEMOGRAPHY_MAP[attributes.publicationDemographic] ?? null)
       : null;
 
     const authors = relationships
@@ -112,7 +115,10 @@ export class MangaMapper {
 
     const tags = attributes.tags.map((tag) => ({
       id: tag.id,
-      name: pickText(tag.attributes.name, 'en') ?? firstAvailable(tag.attributes.name) ?? '',
+      name:
+        pickText(tag.attributes.name, 'en') ??
+        firstAvailable(tag.attributes.name) ??
+        '',
       type: tag.attributes.group.toUpperCase() as 'GENRE' | 'THEME',
     }));
 
@@ -125,7 +131,8 @@ export class MangaMapper {
       lastChapter: attributes.lastChapter,
       coverFileName: cover?.attributes?.fileName ?? null,
       demography,
-      contentRating: attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
+      contentRating:
+        attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
       dexCreatedAt: new Date(attributes.createdAt),
       dexUpdatedAt: new Date(attributes.updatedAt),
       tags,
