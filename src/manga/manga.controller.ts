@@ -4,10 +4,4 @@ import { MangaService } from './manga.service';
 @Controller('mangas')
 export class MangaController {
   constructor(private readonly mangaService: MangaService) {}
-
-  // endpoint temporário pra debug (não vai se manter nesse controller)
-  @Post('import/:id')
-  import(@Param('id') id: string) {
-    return this.mangaService.importFromMangaDex(id);
-  }
 }

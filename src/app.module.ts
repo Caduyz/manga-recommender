@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { MangaModule } from './manga/manga.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RecommendationModule } from './recommendation/recommendation.module';
     PrismaModule,
     MangaModule,
     RecommendationModule,
+    SyncModule,
   ],
   controllers: [AppController],
   providers: [AppService],
