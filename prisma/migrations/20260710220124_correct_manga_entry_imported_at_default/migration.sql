@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "MangaEntry" ALTER COLUMN "importedAt" SET DEFAULT CURRENT_TIMESTAMP;

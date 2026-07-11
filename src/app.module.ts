@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { MangaModule } from './manga/manga.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { SyncModule } from './sync/sync.module';
+import { LibraryModule } from './library/library.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SyncModule } from './sync/sync.module';
     MangaModule,
     RecommendationModule,
     SyncModule,
+    LibraryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

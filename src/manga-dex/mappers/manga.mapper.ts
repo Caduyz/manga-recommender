@@ -55,7 +55,11 @@ export interface MappedManga {
   contentRating: 'SAFE' | 'SUGGESTIVE' | 'EROTICA' | 'PORNOGRAPHIC';
   dexCreatedAt: Date;
   dexUpdatedAt: Date;
-  tags: { id: string; name: string; type: 'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT' }[];
+  tags: {
+    id: string;
+    name: string;
+    type: 'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT';
+  }[];
   authors: { id: string; name: string }[];
   artists: { id: string; name: string }[];
 }
@@ -120,7 +124,8 @@ export class MangaMapper {
         pickText(tag.attributes.name, 'en') ??
         firstAvailable(tag.attributes.name) ??
         '',
-      type: tag.attributes.group.toUpperCase() as 'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT',
+      type: tag.attributes.group.toUpperCase() as
+        'GENRE' | 'THEME' | 'FORMAT' | 'CONTENT',
     }));
 
     return {
@@ -133,7 +138,8 @@ export class MangaMapper {
       lastChapter: attributes.lastChapter,
       coverFileName: cover?.attributes?.fileName ?? null,
       demography,
-      contentRating: attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
+      contentRating:
+        attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
       dexCreatedAt: new Date(attributes.createdAt),
       dexUpdatedAt: new Date(attributes.updatedAt),
       tags,

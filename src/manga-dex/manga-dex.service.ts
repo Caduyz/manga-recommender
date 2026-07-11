@@ -20,18 +20,16 @@ export class MangaDexService {
       );
       return response.data;
     } catch (error) {
-      const axiosError = error as AxiosError; 
+      const axiosError = error as AxiosError;
 
       if (axiosError.response?.status === 429) {
-        this.logger.warn(
-          'Rate limit atingido, aguardando 1s antes de tentar de novo...',
-        );
+        this.logger.warn('Rate limit reached, waiting 1s before retrying...');
         await new Promise((resolve) => setTimeout(resolve, 1000));
         return this.fetchManga(id);
       }
 
       this.logger.error(
-        `Erro ao buscar mangá ${id} na MangaDex`,
+        `Error fetching manga ${id} on MangaDex`,
         axiosError.message,
       );
       throw error;
@@ -49,9 +47,7 @@ export class MangaDexService {
       const axiosError = error as AxiosError;
 
       if (axiosError.response?.status === 429) {
-        this.logger.warn(
-          'Rate limit atingido, aguardando 1s antes de tentar novamente...',
-        );
+        this.logger.warn('Rate limit reached, waiting 1s before retrying...');
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -59,7 +55,7 @@ export class MangaDexService {
       }
 
       this.logger.error(
-        `Erro ao buscar estatísticas do mangá ${id}`,
+        `Error retrieving statistics of manga ${id}`,
         axiosError.message,
       );
 
