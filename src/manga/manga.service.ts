@@ -68,7 +68,7 @@ export class MangaService {
           publicationStatus: mapped.publicationStatus,
           dexUpdatedAt: mapped.dexUpdatedAt,
           tags: { set: [], connectOrCreate: tagConnections },
-          authors: { set: [], connectOrCreate: artistConnections },
+          authors: { set: [], connectOrCreate: authorConnections },
           artists: { set: [], connectOrCreate: artistConnections },
         },
       });
@@ -77,6 +77,8 @@ export class MangaService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
+        console.log('P2002 to', mapped.id);
+
         return this.prisma.manga.findUniqueOrThrow({
           where: { id: mapped.id },
         });
