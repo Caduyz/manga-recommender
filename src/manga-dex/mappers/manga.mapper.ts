@@ -142,7 +142,7 @@ export class MangaMapper {
       demography,
       contentRating:
         attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
-      publicationStatus: 
+      publicationStatus:
         attributes.status.toUpperCase() as MappedManga['publicationStatus'],
       dexCreatedAt: new Date(attributes.createdAt),
       dexUpdatedAt: new Date(attributes.updatedAt),
