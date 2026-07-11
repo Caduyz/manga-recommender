@@ -60,7 +60,7 @@ model MangaEntry {
     chapterProgress Int       @default(0)
     startedAt       DateTime?
     finishedAt      DateTime?
-    importedAt      DateTime  @updatedAt
+    importedAt      DateTime  @default(now())
 
     user  User  @relation(fields: [userId], references: [id])
     manga Manga @relation(fields: [mangaId], references: [id])

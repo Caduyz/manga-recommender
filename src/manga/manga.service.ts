@@ -71,17 +71,27 @@ export class MangaService {
   }
 
   async findRandom() {
-      const count = await this.prisma.manga.count();
+    const count = await this.prisma.manga.count();
 
-      if (count === 0) throw new NotFoundException("Nenhum mangá encontrado.");
+    if (count === 0) throw new NotFoundException('No manga found.');
 
-      const randomIndex = Math.floor(Math.random() * count);
+    const randomIndex = Math.floor(Math.random() * count);
 
-      return this.prisma.manga.findFirst({
-          skip: randomIndex,
-          orderBy: {
-              id: "asc",
-          },
-      });
+    return this.prisma.manga.findFirst({
+      skip: randomIndex,
+      orderBy: {
+        id: 'asc',
+      },
+    });
+  }
+
+  async findLocalById(id: string) {
+    const manga = await this.prisma.manga.findUnique({ where: { id } });
+
+    if (!manga) {
+      throw new NotFoundException(`Mangá ${id} não encontrado`);
+    }
+
+    return manga;
   }
 }

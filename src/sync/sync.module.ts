@@ -6,6 +6,6 @@ import { MangaModule } from '../manga/manga.module';
 @Module({
   imports: [MangaModule],
   controllers: [SyncController],
-  providers: [SyncService]
+  providers: [SyncService],
 })
 export class SyncModule {}
