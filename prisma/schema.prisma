@@ -41,9 +41,10 @@ model Manga {
     authors Creator[] @relation("MangaAuthors")
     artists Creator[] @relation("MangaArtists")
 
-    tags          Tag[]
-    demography    Demography?
-    contentRating ContentRating?
+    tags              Tag[]
+    demography        Demography?
+    contentRating     ContentRating?
+    publicationStatus PublicationStatus?
 
     libraryEntries MangaEntry[]
 
@@ -134,4 +135,11 @@ enum TagType {
     THEME
     FORMAT
     CONTENT
+}
+
+enum PublicationStatus {
+    ONGOING
+    COMPLETED
+    HIATUS
+    CANCELLED
 }

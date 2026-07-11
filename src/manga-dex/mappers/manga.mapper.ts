@@ -8,7 +8,7 @@ interface MangaDexTag {
   id: string;
   attributes: {
     name: LocalizedText;
-    group: 'genre' | 'theme';
+    group: 'genre' | 'theme' | 'format' | 'content';
   };
 }
 
@@ -29,6 +29,7 @@ interface MangaDexMangaAttributes {
   publicationDemographic: 'shounen' | 'shoujo' | 'josei' | 'seinen' | null;
   year: number | null;
   contentRating: 'safe' | 'suggestive' | 'erotica' | 'pornographic';
+  status: 'ongoing' | 'completed' | 'hiatus' | 'cancelled';
   tags: MangaDexTag[];
   createdAt: string;
   updatedAt: string;
@@ -53,6 +54,7 @@ export interface MappedManga {
   coverFileName: string | null;
   demography: 'SHONEN' | 'SHOJO' | 'JOSEI' | 'SEINEN' | null;
   contentRating: 'SAFE' | 'SUGGESTIVE' | 'EROTICA' | 'PORNOGRAPHIC';
+  publicationStatus: 'ONGOING' | 'COMPLETED' | 'HIATUS' | 'CANCELLED';
   dexCreatedAt: Date;
   dexUpdatedAt: Date;
   tags: {
@@ -140,6 +142,8 @@ export class MangaMapper {
       demography,
       contentRating:
         attributes.contentRating.toUpperCase() as MappedManga['contentRating'],
+      publicationStatus:
+        attributes.status.toUpperCase() as MappedManga['publicationStatus'],
       dexCreatedAt: new Date(attributes.createdAt),
       dexUpdatedAt: new Date(attributes.updatedAt),
       tags,
