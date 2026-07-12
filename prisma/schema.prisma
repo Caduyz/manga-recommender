@@ -62,7 +62,7 @@ model MangaEntry {
     status    ReadingStatus
     userScore Int?
 
-    chapterProgress Int       @default(0)
+    chapterProgress Float     @default(0)
     startedAt       DateTime?
     finishedAt      DateTime?
     importedAt      DateTime  @default(now())

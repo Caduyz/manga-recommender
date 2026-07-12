@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "MangaEntry" ALTER COLUMN "chapterProgress" SET DEFAULT 0,
+ALTER COLUMN "chapterProgress" SET DATA TYPE DOUBLE PRECISION;

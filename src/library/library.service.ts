@@ -105,7 +105,7 @@ export class LibraryService {
     }
   }
 
-  // --- Business Rules ---
+  // ------------------------ Business Rules ------------------------
 
   private impliesStarted(status: ReadingStatus): boolean {
     return (
@@ -173,12 +173,23 @@ export class LibraryService {
       return effective === 0 ? 1 : undefined;
     }
 
-    if (status === ReadingStatus.COMPLETED && providedProgress === undefined) {
+    if (status === ReadingStatus.COMPLETED) {
       const manga = await this.mangaService.findLocalById(mangaId);
-      return (
-        this.parseChapterNumber(manga.lastChapter) ??
-        this.parseChapterNumber(manga.lastReleasedChapter)
-      );
+
+      const lastChapter =
+        this.parseChapterNumber(manga.lastChapter) ?? 0;
+
+      const lastReleasedChapter =
+        this.parseChapterNumber(manga.lastReleasedChapter) ?? 0;
+
+      const maxProgress = Math.max(lastChapter, lastReleasedChapter);
+
+      if (
+        providedProgress === undefined ||
+        providedProgress < maxProgress
+      ) {
+        return maxProgress;
+      }
     }
 
     return undefined;
