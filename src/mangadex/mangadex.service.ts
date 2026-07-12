@@ -67,15 +67,15 @@ export class MangaDexService {
       `fetchStatisticsBatch(${ids.length} ids)`,
     );
 
-    // A resposta do MangaDex organiza as estatísticas em um objeto indexado pelo ID.
+    // A resposta do MangaDex organiza as estatísticas em um objeto indexado pelo ID
     const statistics = data.statistics as Record<
       string,
-      { rating?: { average?: number } }
+      { rating?: { bayesian?: number } }
     >;
 
-    // { mangaId -> averageScore | null }
+    // { mangaId -> bayesianScore | null }
     return Object.fromEntries(
-      ids.map((id) => [id, statistics[id]?.rating?.average ?? null]),
+      ids.map((id) => [id, statistics[id]?.rating?.bayesian ?? null]),
     );
   }
 
@@ -85,14 +85,14 @@ export class MangaDexService {
   }
 
   async getMangaById(id: string) {
-    const [manga, averageScore] = await Promise.all([
+    const [manga, bayesianScore] = await Promise.all([
       this.fetchManga(id),
       this.fetchStatistics(id),
     ]);
 
     return {
       ...manga.data,
-      averageScore,
+      bayesianScore,
     };
   }
 

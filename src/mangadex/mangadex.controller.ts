@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { MangaDexService } from './manga-dex.service';
-import { MangaMapper, MangaDexMangaData } from './mappers/manga.mapper';
+import { MangaDexService } from './mangadex.service';
+import { MangaMapper } from './mappers/manga.mapper';
 
 @Controller('manga-dex')
 export class MangaDexController {

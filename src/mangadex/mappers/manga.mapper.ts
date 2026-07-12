@@ -37,7 +37,7 @@ interface MangaDexMangaAttributes {
 
 export interface MangaDexMangaData {
   id: string;
-  averageScore: number | null;
+  bayesianScore: number | null;
 
   attributes: MangaDexMangaAttributes;
   relationships: MangaDexRelationship[];
@@ -49,7 +49,7 @@ export interface MappedManga {
   originalTitle: string | null;
   synopsis: string | null;
   publicationYear: number | null;
-  averageScore: number | null;
+  bayesianScore: number | null;
   lastChapter: string | null;
   coverFileName: string | null;
   demography: 'SHONEN' | 'SHOJO' | 'JOSEI' | 'SEINEN' | null;
@@ -136,7 +136,7 @@ export class MangaMapper {
       originalTitle,
       synopsis,
       publicationYear: attributes.year,
-      averageScore: data.averageScore,
+      bayesianScore: data.bayesianScore,
       lastChapter: attributes.lastChapter,
       coverFileName: cover?.attributes?.fileName ?? null,
       demography,

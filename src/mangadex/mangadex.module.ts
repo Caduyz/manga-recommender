@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MangaDexService } from './manga-dex.service';
-import { MangaDexController } from './manga-dex.controller';
+import { MangaDexService } from './mangadex.service';
+import { MangaDexController } from './mangadex.controller';
 
 @Module({
   imports: [
