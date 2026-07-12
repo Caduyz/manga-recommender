@@ -162,4 +162,12 @@ export class LibraryService {
 
     return undefined;
   }
+
+async findUserLibrary(userId: string) {
+  return this.prisma.mangaEntry.findMany({
+    where: { userId },
+    include: { manga: true },
+    orderBy: { importedAt: 'desc' },
+  });
+}
 }

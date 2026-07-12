@@ -3,15 +3,20 @@ import { LibraryService } from './library.service';
 import { CreateLibraryDto } from './dto/create-library.dto';
 import { UpdateLibraryDto } from './dto/update-library.dto';
 
+const STUB_USER_ID = '@admin^';
+
 @Controller('library')
 export class LibraryController {
   constructor(private readonly libraryService: LibraryService) {}
 
+  @Get()
+  async findAll() {
+    return this.libraryService.findUserLibrary(STUB_USER_ID);
+  }
+
   @Post()
   async create(@Body() dto: CreateLibraryDto) {
-    const userId = '@admin^';
-
-    return this.libraryService.addToLibrary(userId, dto);
+    return this.libraryService.addToLibrary(STUB_USER_ID, dto);
   }
 
   @Patch(':mangaId')
@@ -19,8 +24,6 @@ export class LibraryController {
     @Param('mangaId') mangaId: string,
     @Body() dto: UpdateLibraryDto,
   ) {
-    const userId = '@admin^';
-
-    return this.libraryService.updateLibraryEntry(userId, mangaId, dto);
+    return this.libraryService.updateLibraryEntry(STUB_USER_ID, mangaId, dto);
   }
 }
