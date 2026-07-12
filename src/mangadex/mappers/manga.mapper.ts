@@ -38,6 +38,7 @@ interface MangaDexMangaAttributes {
 export interface MangaDexMangaData {
   id: string;
   bayesianScore: number | null;
+  latestReleasedChapter: string | null;
 
   attributes: MangaDexMangaAttributes;
   relationships: MangaDexRelationship[];
@@ -51,6 +52,7 @@ export interface MappedManga {
   publicationYear: number | null;
   bayesianScore: number | null;
   lastChapter: string | null;
+  latestReleasedChapter: string | null;
   coverFileName: string | null;
   demography: 'SHONEN' | 'SHOJO' | 'JOSEI' | 'SEINEN' | null;
   contentRating: 'SAFE' | 'SUGGESTIVE' | 'EROTICA' | 'PORNOGRAPHIC';
@@ -138,6 +140,7 @@ export class MangaMapper {
       publicationYear: attributes.year,
       bayesianScore: data.bayesianScore,
       lastChapter: attributes.lastChapter,
+      latestReleasedChapter: data.latestReleasedChapter,
       coverFileName: cover?.attributes?.fileName ?? null,
       demography,
       contentRating:
