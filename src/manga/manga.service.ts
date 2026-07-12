@@ -47,6 +47,7 @@ export class MangaService {
           publicationYear: mapped.publicationYear,
           bayesianScore: mapped.bayesianScore,
           lastChapter: mapped.lastChapter,
+          lastReleasedChapter: mapped.latestReleasedChapter,
           coverFileName: mapped.coverFileName,
           demography: mapped.demography,
           contentRating: mapped.contentRating,
@@ -65,6 +66,7 @@ export class MangaService {
           publicationYear: mapped.publicationYear,
           bayesianScore: mapped.bayesianScore,
           lastChapter: mapped.lastChapter,
+          lastReleasedChapter: mapped.latestReleasedChapter,
           coverFileName: mapped.coverFileName,
           demography: mapped.demography,
           contentRating: mapped.contentRating,
@@ -81,7 +83,7 @@ export class MangaService {
         error.code === 'P2002' &&
         !isRetry
       ) {
-        // Entrega nas mãos de Deus e tenta novamente o upsert
+        // Tenta novamente o upsert
         return this.upsertFromMangaDex(mapped, true);
       }
       throw error;

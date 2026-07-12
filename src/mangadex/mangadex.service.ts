@@ -85,14 +85,16 @@ export class MangaDexService {
   }
 
   async getMangaById(id: string) {
-    const [manga, bayesianScore] = await Promise.all([
+    const [manga, bayesianScore, latestReleasedChapter] = await Promise.all([
       this.fetchManga(id),
       this.fetchStatistics(id),
+      this.fetchLatestChapter(id),
     ]);
 
     return {
       ...manga.data,
       bayesianScore,
+      latestReleasedChapter,
     };
   }
 
@@ -120,5 +122,23 @@ export class MangaDexService {
   ): Promise<Record<string, number | null>> {
     if (ids.length === 0) return {};
     return this.fetchStatisticsBatch(ids);
+  }
+
+  private async fetchLatestChapter(id: string): Promise<string | null> {
+    const data = await this.requestWithRetry(
+      () =>
+        firstValueFrom(
+          this.httpService.get(`/manga/${id}/feed`, {
+            params: {
+              'translatedLanguage[]': ['en'],
+              'order[chapter]': 'desc',
+              limit: 1,
+            },
+          }),
+        ),
+      `fetchLatestChapter(${id})`,
+    );
+
+    return data.data[0]?.attributes?.chapter ?? null;
   }
 }

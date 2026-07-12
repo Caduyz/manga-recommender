@@ -31,8 +31,11 @@ model Manga {
     synopsis        String?
     publicationYear Int?
     bayesianScore   Float?
-    coverFileName   String?
-    lastChapter     String?
+
+    coverFileName String?
+
+    lastChapter         String?
+    lastReleasedChapter String?
 
     dexCreatedAt DateTime
     dexUpdatedAt DateTime

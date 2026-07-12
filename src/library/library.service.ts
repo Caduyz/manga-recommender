@@ -135,11 +135,9 @@ export class LibraryService {
     }
   }
 
-  private parseLastChapter(
-    lastChapter: string | null | undefined,
-  ): number | undefined {
-    if (!lastChapter) return undefined;
-    const parsed = Math.floor(parseFloat(lastChapter));
+  private parseChapterNumber(value: string | null | undefined): number | undefined {
+    if (!value) return undefined;
+    const parsed = Math.floor(parseFloat(value));
     return Number.isNaN(parsed) ? undefined : parsed;
   }
 
@@ -156,7 +154,10 @@ export class LibraryService {
 
     if (status === ReadingStatus.COMPLETED && providedProgress === undefined) {
       const manga = await this.mangaService.findLocalById(mangaId);
-      return this.parseLastChapter(manga.lastChapter);
+      return (
+        this.parseChapterNumber(manga.lastChapter) ??
+        this.parseChapterNumber(manga.lastReleasedChapter)
+      );
     }
 
     return undefined;
