@@ -30,7 +30,7 @@ model Manga {
 
     synopsis        String?
     publicationYear Int?
-    averageScore    Float?
+    bayesianScore   Float?
     coverFileName   String?
     lastChapter     String?
 

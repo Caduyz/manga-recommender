@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MangaDexService } from '../manga-dex/manga-dex.service';
-import { MangaMapper, MappedManga } from '../manga-dex/mappers/manga.mapper';
-import { Prisma } from '@prisma/client';
+import { MangaDexService } from '../mangadex/mangadex.service';
+import { MangaMapper, MappedManga } from '../mangadex/mappers/manga.mapper';
+import { Manga, Prisma } from '@prisma/client';
 
 @Injectable()
 export class MangaService {
@@ -17,7 +17,10 @@ export class MangaService {
     return this.upsertFromMangaDex(mapped);
   }
 
-  private async upsertFromMangaDex(mapped: MappedManga) {
+  private async upsertFromMangaDex(
+    mapped: MappedManga,
+    isRetry = false,
+  ): Promise<Manga> {
     const tagConnections = mapped.tags.map((tag) => ({
       where: { id: tag.id },
       create: { id: tag.id, name: tag.name, type: tag.type },
@@ -42,7 +45,7 @@ export class MangaService {
           originalTitle: mapped.originalTitle,
           synopsis: mapped.synopsis,
           publicationYear: mapped.publicationYear,
-          averageScore: mapped.averageScore,
+          bayesianScore: mapped.bayesianScore,
           lastChapter: mapped.lastChapter,
           coverFileName: mapped.coverFileName,
           demography: mapped.demography,
@@ -60,7 +63,7 @@ export class MangaService {
           originalTitle: mapped.originalTitle,
           synopsis: mapped.synopsis,
           publicationYear: mapped.publicationYear,
-          averageScore: mapped.averageScore,
+          bayesianScore: mapped.bayesianScore,
           lastChapter: mapped.lastChapter,
           coverFileName: mapped.coverFileName,
           demography: mapped.demography,
@@ -68,18 +71,18 @@ export class MangaService {
           publicationStatus: mapped.publicationStatus,
           dexUpdatedAt: mapped.dexUpdatedAt,
           tags: { set: [], connectOrCreate: tagConnections },
-          authors: { set: [], connectOrCreate: artistConnections },
+          authors: { set: [], connectOrCreate: authorConnections },
           artists: { set: [], connectOrCreate: artistConnections },
         },
       });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
+        error.code === 'P2002' &&
+        !isRetry
       ) {
-        return this.prisma.manga.findUniqueOrThrow({
-          where: { id: mapped.id },
-        });
+        // Entrega nas mãos de Deus e tenta novamente o upsert
+        return this.upsertFromMangaDex(mapped, true);
       }
       throw error;
     }
@@ -144,9 +147,9 @@ export class MangaService {
     // Adiciona as estatísticas aos dados vindos do MangaDex
     const enriched = newEntries.map((entry) => ({
       ...entry,
-      averageScore: stats[entry.id] ?? null,
+      bayesianScore: stats[entry.id] ?? null,
     }));
-
+    
     // Importa os novos mangás para o banco local
     const imported = await Promise.all(
       enriched.map((entry) =>

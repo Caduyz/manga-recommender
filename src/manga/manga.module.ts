@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MangaDexModule } from '../manga-dex/manga-dex.module';
+import { MangaDexModule } from '../mangadex/mangadex.module';
 import { MangaService } from './manga.service';
 import { MangaController } from './manga.controller';
 
