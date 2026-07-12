@@ -84,6 +84,27 @@ export class LibraryService {
     });
   }
 
+  async findUserLibrary(userId: string) {
+    return this.prisma.mangaEntry.findMany({
+      where: { userId },
+      include: { manga: true },
+      orderBy: { importedAt: 'desc' },
+    });
+  }
+
+  async removeFromLibrary(userId: string, mangaId: string) {
+    try {
+      return await this.prisma.mangaEntry.delete({
+        where: { userId_mangaId: { userId, mangaId } },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new NotFoundException('Entry not found in the user library.');
+      }
+      throw error;
+    }
+  }
+
   // --- Business Rules ---
 
   private impliesStarted(status: ReadingStatus): boolean {
@@ -162,12 +183,4 @@ export class LibraryService {
 
     return undefined;
   }
-
-async findUserLibrary(userId: string) {
-  return this.prisma.mangaEntry.findMany({
-    where: { userId },
-    include: { manga: true },
-    orderBy: { importedAt: 'desc' },
-  });
-}
 }

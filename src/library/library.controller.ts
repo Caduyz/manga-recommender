@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Delete } from '@nestjs/common';
 import { LibraryService } from './library.service';
 import { CreateLibraryDto } from './dto/create-library.dto';
 import { UpdateLibraryDto } from './dto/update-library.dto';
@@ -25,5 +25,10 @@ export class LibraryController {
     @Body() dto: UpdateLibraryDto,
   ) {
     return this.libraryService.updateLibraryEntry(STUB_USER_ID, mangaId, dto);
+  }
+
+  @Delete(':mangaId')
+  async remove(@Param('mangaId') mangaId: string) {
+    return this.libraryService.removeFromLibrary(STUB_USER_ID, mangaId);
   }
 }
