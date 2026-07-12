@@ -40,6 +40,7 @@ model Manga {
     dexCreatedAt DateTime
     dexUpdatedAt DateTime
     importedAt   DateTime
+    updatedAt    DateTime @updatedAt
 
     authors Creator[] @relation("MangaAuthors")
     artists Creator[] @relation("MangaArtists")
