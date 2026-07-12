@@ -12,21 +12,32 @@ export class MangaDexService {
   private async requestWithRetry<T>(
     fn: () => Promise<AxiosResponse<T>>,
     context: string,
+    attempt = 0,
   ): Promise<T> {
+    const MAX_RETRIES = 5;
+
     try {
       const response = await fn();
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
 
-      // A MangaDex respondeu com rate limit (HTTP 429)
-      // Aguarda 1 segundo e tenta novamente a mesma requisição
+      // Aguarda um tempo crescente (backoff exponencial) e tenta novamente até um limite de tentativas
+      // Evita escalar pra um banimento temporário de IP
       if (axiosError.response?.status === 429) {
+        if (attempt >= MAX_RETRIES) {
+          this.logger.error(
+            `Persistent rate limit on ${context}, giving up after ${MAX_RETRIES} attempts.`,
+          );
+          throw error;
+        }
+
+        const waitMs = 1000 * 2 ** attempt; // 1s, 2s, 4s, 8s, 16s...
         this.logger.warn(
-          `Rate limit reached on ${context}, waiting 1s before retrying...`,
+          `Rate limit reached on ${context}, waiting ${waitMs}ms before retrying... (attempt ${attempt + 1}/${MAX_RETRIES})`,
         );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        return this.requestWithRetry(fn, context);
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+        return this.requestWithRetry(fn, context, attempt + 1);
       }
 
       // A requisição excedeu o tempo limite configurado
