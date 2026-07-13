@@ -9,6 +9,7 @@ import { MangaModule } from './manga/manga.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { SyncModule } from './sync/sync.module';
 import { LibraryModule } from './library/library.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { LibraryModule } from './library/library.module';
     RecommendationModule,
     SyncModule,
     LibraryModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

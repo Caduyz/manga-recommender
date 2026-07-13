@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  Max,
+  Min,
+} from 'class-validator';
 import { ReadingStatus } from '@prisma/client';
 
 export class UpdateLibraryDto {
@@ -14,7 +22,7 @@ export class UpdateLibraryDto {
   userScore?: number;
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   chapterProgress?: number;
 
