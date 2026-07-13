@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { SyncController } from './sync.controller';
-import { SyncService } from './sync.service';
+import { SearchController } from './search.controller';
+import { SearchService } from './search.service';
 import { MangaModule } from '../manga/manga.module';
 import { MangaDexModule } from '../mangadex/mangadex.module';
 
 @Module({
   imports: [MangaModule, MangaDexModule],
-  controllers: [SyncController],
-  providers: [SyncService],
+  controllers: [SearchController],
+  providers: [SearchService],
 })
-export class SyncModule {}
+export class SearchModule {}

@@ -1,26 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MangaDexService } from '../mangadex/mangadex.service';
-import { MangaMapper, MappedManga } from '../mangadex/mappers/manga.mapper';
-import { Manga, Prisma } from '@prisma/client';
+import { MappedManga } from '../mangadex/mappers/manga.mapper';
+import { Manga, Prisma, Tag } from '@prisma/client';
 
 @Injectable()
 export class MangaService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mangaDexService: MangaDexService,
   ) {}
 
-  async syncManga(id: string) {
-    const raw = await this.mangaDexService.getMangaById(id);
-    const mapped = MangaMapper.toInternal(raw);
-    return this.upsertFromMangaDex(mapped);
-  }
-
-  private async upsertFromMangaDex(
+  async upsertFromMangaDex(
     mapped: MappedManga,
     isRetry = false,
-  ): Promise<Manga> {
+  ): Promise<Manga & { tags: Tag[] }> {
     const tagConnections = mapped.tags.map((tag) => ({
       where: { id: tag.id },
       create: { id: tag.id, name: tag.name, type: tag.type },
@@ -76,6 +68,7 @@ export class MangaService {
           authors: { set: [], connectOrCreate: authorConnections },
           artists: { set: [], connectOrCreate: artistConnections },
         },
+        include: { tags: true },
       });
     } catch (error) {
       if (
@@ -113,53 +106,5 @@ export class MangaService {
     }
 
     return manga;
-  }
-
-  async findByTitle(query: string) {
-    // Busca simultaneamente no banco local e no MangaDex
-    const [localResults, externalEntries] = await Promise.all([
-      this.prisma.manga.findMany({
-        where: {
-          OR: [
-            { title: { contains: query, mode: 'insensitive' } },
-            { originalTitle: { contains: query, mode: 'insensitive' } },
-          ],
-        },
-      }),
-      this.mangaDexService.searchByTitle(query),
-    ]);
-
-    // Identifica os mangás já presentes no banco local
-    const localIds = new Set(localResults.map((manga) => manga.id));
-
-    // Remove resultados já existentes e elimina possíveis duplicatas retornadas pela API externa
-    const newEntries = Array.from(
-      new Map(
-        externalEntries
-          .filter((entry) => !localIds.has(entry.id))
-          .map((entry) => [entry.id, entry]),
-      ).values(),
-    );
-
-    // Busca estatísticas apenas dos mangás que ainda não foram importados
-    const stats = await this.mangaDexService.getStatisticsBatch(
-      newEntries.map((entry) => entry.id),
-    );
-
-    // Adiciona as estatísticas aos dados vindos do MangaDex
-    const enriched = newEntries.map((entry) => ({
-      ...entry,
-      bayesianScore: stats[entry.id] ?? null,
-    }));
-    
-    // Importa os novos mangás para o banco local
-    const imported = await Promise.all(
-      enriched.map((entry) =>
-        this.upsertFromMangaDex(MangaMapper.toInternal(entry)),
-      ),
-    );
-
-    // Retorna os mangás locais juntamente com os recém-importados.
-    return [...localResults, ...imported];
   }
 }

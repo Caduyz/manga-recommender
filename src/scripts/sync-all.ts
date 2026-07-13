@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
-import { MangaService } from '../manga/manga.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SyncService } from '../sync/sync.service';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const mangaService = app.get(MangaService);
+  const syncService = app.get(SyncService);
   const prisma = app.get(PrismaService);
 
   const allManga = await prisma.manga.findMany({
@@ -17,18 +17,21 @@ async function bootstrap() {
   let success = 0;
   let failed = 0;
 
-for (const [index, manga] of allManga.entries()) {
+  for (const [index, manga] of allManga.entries()) {
     try {
-        await mangaService.syncManga(manga.id);
-        success++;
-        console.log(`[${index + 1}/${allManga.length}] OK: ${manga.title}`);
+      await syncService.syncManga(manga.id);
+      success++;
+      console.log(`[${index + 1}/${allManga.length}] OK: ${manga.title}`);
     } catch (error) {
-        failed++;
-        console.error(`[${index + 1}/${allManga.length}] FALHOU: ${manga.title}`, (error as Error).message);
+      failed++;
+      console.error(
+        `[${index + 1}/${allManga.length}] FALHOU: ${manga.title}`,
+        (error as Error).message,
+      );
     }
 
     await new Promise((resolve) => setTimeout(resolve, 300)); // pausa entre cada mangá
-    }
+  }
 
   console.log(`Completed. Sucess: ${success}, Faileds: ${failed}.`);
   await app.close();

@@ -1,17 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
-import { MangaService } from '../manga/manga.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PublicationStatus } from '@prisma/client';
+import { SyncService } from '../sync/sync.service';
 
 const STALE_THRESHOLD_HOURS = 24;
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const mangaService = app.get(MangaService);
+  const syncService = app.get(SyncService);
   const prisma = app.get(PrismaService);
 
-  const threshold = new Date(Date.now() - STALE_THRESHOLD_HOURS * 60 * 60 * 1000);
+  const threshold = new Date(
+    Date.now() - STALE_THRESHOLD_HOURS * 60 * 60 * 1000,
+  );
 
   const staleOngoing = await prisma.manga.findMany({
     where: {
@@ -28,14 +30,17 @@ async function bootstrap() {
 
   for (const [index, manga] of staleOngoing.entries()) {
     try {
-      await mangaService.syncManga(manga.id);
+      await syncService.syncManga(manga.id);
       success++;
       console.log(`[${index + 1}/${staleOngoing.length}] OK: ${manga.title}`);
     } catch (error) {
       failed++;
-      console.error(`[${index + 1}/${staleOngoing.length}] FAILED: ${manga.title}`, (error as Error).message);
+      console.error(
+        `[${index + 1}/${staleOngoing.length}] FAILED: ${manga.title}`,
+        (error as Error).message,
+      );
     }
-    
+
     await new Promise((resolve) => setTimeout(resolve, 300)); // pausa entre cada mangá
   }
 

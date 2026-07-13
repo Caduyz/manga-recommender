@@ -98,7 +98,10 @@ export class LibraryService {
         where: { userId_mangaId: { userId, mangaId } },
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
         throw new NotFoundException('Entry not found in the user library.');
       }
       throw error;
@@ -156,7 +159,9 @@ export class LibraryService {
     }
   }
 
-  private parseChapterNumber(value: string | null | undefined): number | undefined {
+  private parseChapterNumber(
+    value: string | null | undefined,
+  ): number | undefined {
     if (!value) return undefined;
     const parsed = Math.floor(parseFloat(value));
     return Number.isNaN(parsed) ? undefined : parsed;
@@ -176,18 +181,14 @@ export class LibraryService {
     if (status === ReadingStatus.COMPLETED) {
       const manga = await this.mangaService.findLocalById(mangaId);
 
-      const lastChapter =
-        this.parseChapterNumber(manga.lastChapter) ?? 0;
+      const lastChapter = this.parseChapterNumber(manga.lastChapter) ?? 0;
 
       const lastReleasedChapter =
         this.parseChapterNumber(manga.lastReleasedChapter) ?? 0;
 
       const maxProgress = Math.max(lastChapter, lastReleasedChapter);
 
-      if (
-        providedProgress === undefined ||
-        providedProgress < maxProgress
-      ) {
+      if (providedProgress === undefined || providedProgress < maxProgress) {
         return maxProgress;
       }
     }

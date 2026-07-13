@@ -88,9 +88,10 @@ The backend is built using a modular architecture with NestJS. Each module is re
 src  
 ├── library  
 ├── manga  
-├── manga-dex  
+├── mangadex  
 ├── prisma  
 ├── recommendation  
+├── search  
 ├── sync  
 └── app.module.ts
 
@@ -117,17 +118,28 @@ Internal Models
 
 ### Mangas
 
-| Method | Endpoint                       |
-| ------ | ------------------------------ |
-| GET    | `/mangas/search?title={title}` |
-| GET    | `/mangas/:mangaId`             |
+| Method | Endpoint           |
+| ------ | ------------------ |
+| GET    | `/mangas/:mangaId` |
+
+### Search
+
+| Method | Endpoint               |
+| ------ | ---------------------- |
+| GET    | `/search?title={...}`  |
+| GET    | `/search?author={...}` |
+| GET    | `/search?tag={...}`    |
+
+> You can combine author and tag filters
 
 ### Library
 
 | Method | Endpoint            |
 | ------ | ------------------- |
+| GET    | `/library`          |
 | POST   | `/library`          |
 | PATCH  | `/library/:mangaId` |
+| DELETE | `/library/:mangaId` |
 
 ### Synchronization
 
