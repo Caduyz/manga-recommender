@@ -2,6 +2,7 @@ import { GatewayTimeoutException, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
+import { MangaDexTag } from './mangadex.types';
 
 @Injectable()
 export class MangaDexService {
@@ -132,7 +133,17 @@ export class MangaDexService {
     ids: string[],
   ): Promise<Record<string, number | null>> {
     if (ids.length === 0) return {};
-    return this.fetchStatisticsBatch(ids);
+
+    const CHUNK_SIZE = 100;
+    const chunks: string[][] = [];
+    for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+      chunks.push(ids.slice(i, i + CHUNK_SIZE));
+    }
+
+    const results = await Promise.all(
+      chunks.map((chunk) => this.fetchStatisticsBatch(chunk)),
+    );
+    return Object.assign({}, ...results);
   }
 
   private async fetchLatestChapter(id: string): Promise<string | null> {
@@ -151,5 +162,40 @@ export class MangaDexService {
     );
 
     return data.data[0]?.attributes?.chapter ?? null;
+  }
+
+  async getTags(): Promise<MangaDexTag[]> {
+    const response = await this.requestWithRetry(
+      () => firstValueFrom(this.httpService.get('/manga/tag')),
+      `getTags`,
+    );
+
+    return response.data.map((tag: any) => ({
+      id: tag.id,
+      name: tag.attributes.name.en ?? Object.values(tag.attributes.name)[0],
+      group: tag.attributes.group,
+    }));
+  }
+
+  async searchByTag(
+    tagId: string,
+    orderBy: 'rating' | 'followedCount' | 'createdAt',
+    limit = 5,
+  ) {
+    const data = await this.requestWithRetry(
+      () =>
+        firstValueFrom(
+          this.httpService.get('/manga', {
+            params: {
+              'includedTags[]': [tagId],
+              [`order[${orderBy}]`]: 'desc',
+              limit,
+              'includes[]': ['author', 'artist', 'cover_art'],
+            },
+          }),
+        ),
+      `searchByTag(${tagId}, ${orderBy})`,
+    );
+    return data.data as any[];
   }
 }

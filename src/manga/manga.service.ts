@@ -5,9 +5,7 @@ import { Manga, Prisma, Tag } from '@prisma/client';
 
 @Injectable()
 export class MangaService {
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async upsertFromMangaDex(
     mapped: MappedManga,
