@@ -7,7 +7,7 @@ import { MangaMapper } from '../mangadex/mappers/manga.mapper';
 export class SyncService {
   constructor(
     private readonly mangaService: MangaService,
-    private readonly mangaDexService: MangaDexService
+    private readonly mangaDexService: MangaDexService,
   ) {}
 
   async syncManga(id: string) {

@@ -101,6 +101,7 @@ model TagAffinity {
     intersection Int
     union        Int
     similarity   Float
+    occurrences  Int
 
     updatedAt DateTime @updatedAt
 

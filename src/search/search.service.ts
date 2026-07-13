@@ -12,7 +12,7 @@ export class SearchService {
     private readonly mangaDexService: MangaDexService,
     private readonly mangaService: MangaService,
   ) {}
-  
+
   // -------------------- Search Methods --------------------
   async search(filters: { title?: string; author?: string; tags?: string[] }) {
     if (filters.title) {
