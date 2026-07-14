@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { MangaService } from '../manga/manga.service';
 import { LibraryService } from '../library/library.service';
-import { ReadingStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { ReadingStatus, TagType } from '@prisma/client';
 
 @Injectable()
 export class RecommendationService {
   constructor(
     private readonly mangaService: MangaService,
     private readonly libraryService: LibraryService,
-    private readonly prisma: PrismaService
   ) {}
 
   async getRandomManga() {
@@ -46,86 +44,89 @@ export class RecommendationService {
       .map((entry) => entry.manga);
   }
 
-  private buildDirectWeights(entries: Awaited<ReturnType<LibraryService['findUserEntriesWithTags']>>) {
-    const weights = new Map<string, number>();
-
-    for (const entry of entries) {
-      let contribution: number | null = null;
-
-      if (entry.userScore !== null) {
-        contribution = entry.userScore - 5;
-      } else if (entry.status === ReadingStatus.DROPPED) {
-        contribution = -3;
-      }
-
-      if (contribution === null) continue;
-
-      for (const tag of entry.manga.tags) {
-        weights.set(tag.id, (weights.get(tag.id) ?? 0) + contribution);
-      }
-    }
-
-    return weights;
-  }
-
-  private async buildInheritedWeights(directWeights: Map<string, number>) {
-    const directTagIds = Array.from(directWeights.keys());
-    if (directTagIds.length === 0) return new Map<string, number>();
-
-    const affinities = await this.prisma.tagAffinity.findMany({
-      where: {
-        OR: [{ tagAId: { in: directTagIds } }, { tagBId: { in: directTagIds } }],
-      },
-    });
-
-    const DAMPING = 0.4;
-    const inherited = new Map<string, number>();
-
-    for (const affinity of affinities) {
-      const aIsDirect = directWeights.has(affinity.tagAId);
-      const bIsDirect = directWeights.has(affinity.tagBId);
-
-      if (aIsDirect && !bIsDirect) {
-        const contribution = DAMPING * affinity.similarity * directWeights.get(affinity.tagAId)!;
-        inherited.set(affinity.tagBId, (inherited.get(affinity.tagBId) ?? 0) + contribution);
-      } else if (bIsDirect && !aIsDirect) {
-        const contribution = DAMPING * affinity.similarity * directWeights.get(affinity.tagBId)!;
-        inherited.set(affinity.tagAId, (inherited.get(affinity.tagAId) ?? 0) + contribution);
-      }
-      // se os dois já são diretos, a tag já tem peso próprio — não sobrescreve
-    }
-
-    return inherited;
+  private isScorableTagType(type: TagType): boolean {
+    return type !== TagType.FORMAT;
   }
 
   async findPersonalized(userId: string, limit = 20) {
     const entries = await this.libraryService.findUserEntriesWithTags(userId);
-    const directWeights = this.buildDirectWeights(entries);
-
-    if (directWeights.size === 0) return [];
-
-    const inheritedWeights = await this.buildInheritedWeights(directWeights);
-
-    const finalWeights = new Map<string, number>([...inheritedWeights, ...directWeights]);
-    // Repare a ordem do spread: inheritedWeights primeiro, directWeights por cima —
-    // isso garante que, se uma tag existir nos dois mapas, o peso DIRETO vence.
-
-    const relevantTagIds = Array.from(finalWeights.keys());
     const excludeIds = entries.map((entry) => entry.mangaId);
 
-    const candidates = await this.mangaService.findCandidatesByTagIds(relevantTagIds, excludeIds);
+    const sources = entries
+      .map((entry) => {
+        let sign: number | null = null;
+        if (entry.userScore !== null) sign = entry.userScore - 5;
+        else if (entry.status === ReadingStatus.DROPPED) sign = -3;
+        if (sign === null || sign === 0) return null;
 
-    const scored = candidates.map((manga) => {
-      const score = manga.tags.reduce(
-        (sum, tag) => sum + (finalWeights.get(tag.id) ?? 0),
-        0,
-      );
-      return { manga, score };
+        const tagIds = entry.manga.tags
+          .filter((tag) => this.isScorableTagType(tag.type))
+          .map((tag) => tag.id);
+        if (tagIds.length === 0) return null;
+
+        return { sign, tagSet: new Set(tagIds) };
+      })
+      .filter((s): s is { sign: number; tagSet: Set<string> } => s !== null);
+
+    if (sources.length === 0) return [];
+
+    const allRelevantTagIds = Array.from(
+      new Set(sources.flatMap((source) => Array.from(source.tagSet))),
+    );
+
+    const candidates = await this.mangaService.findCandidatesByTagIds(allRelevantTagIds, excludeIds);
+
+    const perSourceRankings = sources.map((source) => {
+      return candidates
+        .map((candidate) => {
+          const candidateSet = new Set(
+            candidate.tags
+              .filter((tag) => this.isScorableTagType(tag.type))
+              .map((tag) => tag.id),
+          );
+
+          let intersection = 0;
+          for (const id of source.tagSet) {
+            if (candidateSet.has(id)) intersection++;
+          }
+          if (intersection === 0) return null;
+
+          const union = source.tagSet.size + candidateSet.size - intersection;
+          const similarity = union === 0 ? 0 : intersection / union;
+          const score = source.sign * similarity;
+
+          return score > 0 ? { manga: candidate, score } : null;
+        })
+        .filter((e): e is { manga: (typeof candidates)[number]; score: number } => e !== null)
+        .sort((a, b) => b.score - a.score);
     });
 
-    return scored
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((entry) => entry.manga);
+    const result: (typeof candidates)[number][] = [];
+    const seen = new Set<string>();
+    const cursors = new Array(perSourceRankings.length).fill(0);
+
+    while (result.length < limit) {
+      let addedInThisRound = false;
+
+      for (let i = 0; i < perSourceRankings.length; i++) {
+        const ranking = perSourceRankings[i];
+        while (cursors[i] < ranking.length && seen.has(ranking[cursors[i]].manga.id)) {
+          cursors[i]++;
+        }
+        if (cursors[i] >= ranking.length) continue;
+
+        const next = ranking[cursors[i]];
+        seen.add(next.manga.id);
+        result.push(next.manga);
+        cursors[i]++;
+        addedInThisRound = true;
+
+        if (result.length >= limit) break;
+      }
+
+      if (!addedInThisRound) break;
+    }
+
+    return result;
   }
 }
