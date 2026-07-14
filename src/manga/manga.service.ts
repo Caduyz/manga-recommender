@@ -119,10 +119,10 @@ export class MangaService {
     return manga;
   }
 
-  async findCandidatesByTagIds(tagIds: string[], excludeId: string) {
+  async findCandidatesByTagIds(tagIds: string[], excludeIds: string[]) {
     return this.prisma.manga.findMany({
       where: {
-        id: { not: excludeId },
+        id: { notIn: excludeIds },
         tags: { some: { id: { in: tagIds } } },
       },
       include: { tags: true },

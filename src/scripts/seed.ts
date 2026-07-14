@@ -5,7 +5,11 @@ import { MangaService } from '../manga/manga.service';
 import { MangaMapper } from '../mangadex/mappers/manga.mapper';
 
 const ORDERINGS = ['rating', 'followedCount', 'createdAt'] as const;
-const LIMIT_PER_ORDER = 10;
+const ORDER_LIMITS: Record<(typeof ORDERINGS)[number], number> = {
+  rating: 15,
+  followedCount: 15,
+  createdAt: 5,
+};
 const PERSIST_BATCH_SIZE = 25;
 
 async function bootstrap() {
@@ -26,7 +30,7 @@ async function bootstrap() {
           const entries = await mangaDexService.searchByTag(
             tag.id,
             orderBy,
-            LIMIT_PER_ORDER,
+            ORDER_LIMITS[orderBy],
           );
           for (const entry of entries) {
             discovered.set(entry.id, entry);
