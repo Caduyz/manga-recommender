@@ -108,6 +108,13 @@ export class LibraryService {
     }
   }
 
+  async findUserEntriesWithTags(userId: string) {
+    return this.prisma.mangaEntry.findMany({
+      where: { userId },
+      include: { manga: { include: { tags: true } } },
+    });
+  }
+
   // ------------------------ Business Rules ------------------------
 
   private impliesStarted(status: ReadingStatus): boolean {
