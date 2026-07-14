@@ -105,4 +105,27 @@ export class MangaService {
 
     return manga;
   }
+
+  async findLocalByIdWithTags(id: string) {
+    const manga = await this.prisma.manga.findUnique({
+      where: { id },
+      include: { tags: true },
+    });
+
+    if (!manga) {
+      throw new NotFoundException(`Manga ${id} not found.`);
+    }
+
+    return manga;
+  }
+
+  async findCandidatesByTagIds(tagIds: string[], excludeId: string) {
+    return this.prisma.manga.findMany({
+      where: {
+        id: { not: excludeId },
+        tags: { some: { id: { in: tagIds } } },
+      },
+      include: { tags: true },
+    });
+  }
 }

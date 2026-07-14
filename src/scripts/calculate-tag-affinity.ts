@@ -64,7 +64,9 @@ async function bootstrap() {
       }
     }
 
-    console.log(`${affinities.length} pairs with calculated affinity (of a theoretical maximum of ${(tagIds.length * (tagIds.length - 1)) / 2}).`);
+    console.log(
+      `${affinities.length} pairs with calculated affinity (of a theoretical maximum of ${(tagIds.length * (tagIds.length - 1)) / 2}).`,
+    );
 
     // Etapa 4 — regenerar a tabela inteira
     console.log('Persisting...');
