@@ -141,6 +141,13 @@ Internal Models
 | PATCH  | `/library/:mangaId` |
 | DELETE | `/library/:mangaId` |
 
+### Recommendations
+
+| Method | Endpoint                            |
+| ------ | ----------------------------------- |
+| GET    | `/recommendations/random`           |
+| GET    | `/recommendations/similar/:mangaId` |
+
 ### Synchronization
 
 | Method | Endpoint               |
@@ -155,7 +162,7 @@ Internal Models
 
 - [x] Manga data synchronization
 - [x] Library
-- [ ] Recommendations algorithm
+- [ ] Recommendations algorithm (50%)
 - [ ] Authentication
 - [ ] Web interface
 

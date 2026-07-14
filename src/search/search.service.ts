@@ -106,22 +106,21 @@ export class SearchService {
     };
   }
 
-  private rankByTagMatches<T extends { tags: { name: string }[] }>(
-    results: T[],
-    tags?: string[],
-  ): T[] {
-    if (!tags || tags.length === 0) return results;
-
-    const lowerTags = tags.map((t) => t.toLowerCase());
+  private rankByTagMatches<
+    T extends { tags: { name: string }[]; bayesianScore: number | null },
+  >(results: T[], tags?: string[]): T[] {
+    const lowerTags = tags?.map((t) => t.toLowerCase());
 
     return [...results].sort((a, b) => {
-      const countA = a.tags.filter((t) =>
-        lowerTags.includes(t.name.toLowerCase()),
-      ).length;
-      const countB = b.tags.filter((t) =>
-        lowerTags.includes(t.name.toLowerCase()),
-      ).length;
-      return countB - countA;
+      if (lowerTags && lowerTags.length > 0) {
+        const countA = a.tags.filter((t) => lowerTags.includes(t.name.toLowerCase())).length;
+        const countB = b.tags.filter((t) => lowerTags.includes(t.name.toLowerCase())).length;
+        if (countA !== countB) return countB - countA;
+      }
+
+      const scoreA = a.bayesianScore ?? -Infinity;
+      const scoreB = b.bayesianScore ?? -Infinity;
+      return scoreB - scoreA;
     });
   }
 }
