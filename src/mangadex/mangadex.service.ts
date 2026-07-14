@@ -180,7 +180,7 @@ export class MangaDexService {
   async searchByTag(
     tagId: string,
     orderBy: 'rating' | 'followedCount' | 'createdAt',
-    limit = 5,
+    limit = 10,
   ) {
     const data = await this.requestWithRetry(
       () =>
