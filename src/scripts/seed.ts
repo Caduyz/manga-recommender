@@ -5,7 +5,7 @@ import { MangaService } from '../manga/manga.service';
 import { MangaMapper } from '../mangadex/mappers/manga.mapper';
 
 const ORDERINGS = ['rating', 'followedCount', 'createdAt'] as const;
-const LIMIT_PER_ORDER = 7;
+const LIMIT_PER_ORDER = 10;
 const PERSIST_BATCH_SIZE = 25;
 
 async function bootstrap() {
